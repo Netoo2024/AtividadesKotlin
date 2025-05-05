@@ -1,0 +1,181 @@
+import java.util.Calendar
+
+val expressaoRegular = Regex("^[0-5]$")  // Agora valida de forma mais precisa a entrada do menu
+
+// Lista global de convidados
+var listaConvidados: MutableList<Convidado> = mutableListOf()
+
+fun main() {
+    val horaAtual = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    println(horaAtual)
+    menu()
+}
+
+private fun menu() {
+    var opcao: String
+    do {
+        println("--- MENU ---")
+        println("1- CADASTRAR")
+        println("2- LISTAR")
+        println("3- EDITAR")
+        println("4- EXCLUIR")
+        println("5- BUSCA")
+        println("0- SAIR")
+        opcao = readln()
+
+        if (expressaoRegular.matches(opcao)) {
+            when (opcao.toInt()) {
+                1 -> {
+                    println("Cadastrando...")
+                    cadastrar()
+                }
+
+                2 -> {
+                    println("Listando...")
+                    listar()
+                }
+
+                3 -> {
+                    println("Editando...")
+                    editar()
+                }
+
+                4 -> {
+                    println("Excluindo...")
+                    excluir()
+                }
+
+                5 -> {
+                    println("Buscando...")
+                    busca()
+                }
+
+                0 -> println("Saindo...")
+            }
+        } else {
+            println("\nOpção inválida.")
+        }
+    } while (opcao != "0")
+}
+
+// QUESTÃO 1 – Validar nome com letras
+private fun cadastrar() {
+    val convidado = Convidado()
+    val regexNome = Regex("^[a-zA-Zá-úÁ-ÚçÇ ]+$")
+
+    var nome: String
+    do {
+        print("Qual o seu nome? ")
+        nome = readln()
+        if (!regexNome.matches(nome)) {
+            println("Nome inválido! Digite apenas letras.")
+        }
+    } while (!regexNome.matches(nome))
+
+    convidado.nome = nome
+
+    print("Qual vai ser o presente? ")
+    convidado.presente = readln()
+
+    print("Qual sua restrição alimentar? ")
+    convidado.alimentar = readln()
+
+    listaConvidados.add(convidado)
+}
+
+// LISTAR convidados
+private fun listar() {
+    if (validar()) {
+        listaConvidados.sortBy { it.nome }
+
+        listaConvidados.forEachIndexed { i, convidado ->
+            println(
+                "Posição: $i, " +
+                        "Nome: ${convidado.nome}, " +
+                        "Presente: ${convidado.presente}, " +
+                        "Restrição: ${convidado.alimentar}, " +
+                        "Vai à festa? ${if (convidado.presenca) "Sim" else "Não"}"
+            )
+        }
+    }
+    println("Listagem concluída com sucesso")
+}
+
+// QUESTÃO 2 – Validar posição e resposta
+private fun editar(): Boolean {
+    if (validar()) {
+        listar()
+
+        var posicao: Int?
+        do {
+            println("Digite a posição a ser editada: ")
+            posicao = readln().toIntOrNull()
+            if (posicao == null || posicao !in listaConvidados.indices) {
+                println("Posição inválida!")
+            }
+        } while (posicao == null || posicao !in listaConvidados.indices)
+
+        var resposta: String
+        do {
+            println("O convidado vai? (Sim/Não)")
+            resposta = readln().trim().uppercase()  // Adicionando .trim() para limpar espaços extras
+            if (resposta != "SIM" && resposta != "NÃO") {
+                println("Resposta inválida! Digite SIM ou NÃO.")
+            }
+        } while (resposta != "SIM" && resposta != "NÃO")
+
+        listaConvidados[posicao].presenca = (resposta == "SIM")
+    }
+    return true
+}
+
+// QUESTÃO 3 – Validar posição
+private fun excluir(): Boolean {
+    if (!validar()) return false
+
+    listar()
+
+    var posicao: Int?
+    do {
+        println("Qual posição você deseja remover: ")
+        posicao = readln().toIntOrNull()
+        if (posicao == null || posicao !in listaConvidados.indices) {
+            println("Posição inválida!")
+        }
+    } while (posicao == null || posicao !in listaConvidados.indices)
+
+    listaConvidados.removeAt(posicao)
+    println("Convidado excluído com sucesso.")
+    return true
+}
+
+// QUESTÃO 4 – Validação alfabética e busca ignorando maiúsculas/minúsculas
+private fun busca() {
+    val regexBusca = Regex("^[a-zA-Zá-úÁ-ÚçÇ ]+$")
+    var busca: String
+
+    do {
+        print("Digite o nome da pessoa que você busca: ")
+        busca = readln()
+        if (!regexBusca.matches(busca)) {
+            println("Busca inválida! Digite apenas letras.")
+        }
+    } while (!regexBusca.matches(busca))
+
+    var i = 0
+    listaConvidados.forEach { convidado ->
+        if (convidado.nome.contains(busca, ignoreCase = true)) {
+            println("Posição: $i, Nome: ${convidado.nome}")
+        }
+        i++
+    }
+}
+
+// Verifica se a lista está vazia
+private fun validar(): Boolean {
+    if (listaConvidados.isEmpty()) {
+        println("Lista vazia! Finalizando...")
+        return false
+    }
+    return true
+}
