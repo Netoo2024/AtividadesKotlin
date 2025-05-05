@@ -1,0 +1,28 @@
+fun fibonacci(n: Int): Int {
+    // Caso base: se n for 0 ou 1, retorna n.
+    if (n <= 1) return n
+
+    var a = 0  
+    var b = 1  
+
+    for (i in 2..n) {
+        val temp = b  
+        b += a  
+        a = temp  
+    }
+
+    return b 
+}
+
+fun main() {
+    // Solicita ao usuário o número de termos para calcular
+    print("Digite o valor de n para calcular o Fibonacci: ")
+    val n = readLine()?.toIntOrNull() ?: 0
+
+    if (n < 0) {
+        println("Insira um número não negativo.")
+    } else {
+        // Exibe o resultado do cálculo de Fibonacci
+        println("Fibonacci de $n é: ${fibonacci(n)}")
+    }
+}
